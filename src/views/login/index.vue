@@ -5,20 +5,19 @@
       <h1>登录</h1>
       <el-card shadow="never" class="login-card">
         <!--登录表单-->
-        <el-form ref="loginForm" :model="loginForm" status-icon :rules="rules" label-position="right" label-width="100px" class="demo-loginForm">
-          <el-form-item label="手机号" prop="phone">
-            <el-input v-model="loginForm.phone" type="number" autocomplete="off" placeholder="请输入手机号" />
+        <el-form ref="form" :model="loginForm" status-icon :rules="rules" label-position="right" label-width="100px" class="demo-loginForm">
+          <el-form-item label="手机号" prop="mobile">
+            <el-input v-model="loginForm.mobile" type="number" autocomplete="off" placeholder="请输入手机号" />
           </el-form-item>
-          <el-form-item label="密码" prop="psw">
-            <el-input v-model="loginForm.psw" type="password" autocomplete="off" show-password placeholder="请输入密码" />
+          <el-form-item label="密码" prop="password">
+            <el-input v-model="loginForm.password" type="password" autocomplete="off" show-password placeholder="请输入密码" />
           </el-form-item>
           <el-form-item prop="isAgree">
             <el-checkbox v-model="loginForm.isAgree" label="用户平台使用协议" name="type" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" style="width:350px" @click="login('loginForm')">登录</el-button>
+            <el-button type="primary" style="width:350px" @click="login()">登录</el-button>
           </el-form-item>
-          <el-button @click="test">lg</el-button>
         </el-form>
       </el-card>
     </div>
@@ -29,13 +28,14 @@ export default {
   name: 'Login',
   data() {
     return {
+      // 开发环境直接把数据填入
       loginForm: {
-        phone: '',
-        psw: '',
-        isAgree: false
+        mobile: process.env.NODE_ENV === 'development' ? '13800000002' : '',
+        password: process.env.NODE_ENV === 'development' ? 'hm#qd@23!' : '',
+        isAgree: process.env.NODE_ENV === 'development'
       },
       rules: {
-        phone: [
+        mobile: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
           {
             pattern: /^1[3-9]\d{9}$/,
@@ -43,7 +43,7 @@ export default {
             trigger: 'blur'
           }
         ],
-        psw: [
+        password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
           {
             pattern: /^\S{6,15}/,
@@ -62,10 +62,11 @@ export default {
     }
   },
   methods: {
-    login(formName) {
-      this.$refs[formName].validate((valid) => {
+    login() {
+      this.$refs.form.validate(async(valid) => {
         if (valid) {
-          this.$store.dispatch('user/login', this.loginForm)
+          await this.$store.dispatch('user/login', this.loginForm)
+          this.$router.push('/')
           this.$message.success('登录成功')
         } else {
           this.$message.error('登录失败')
