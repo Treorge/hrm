@@ -20,7 +20,6 @@ const mutations = {
 const actions = {
   // context上下文，传入参数
   async login(context, data) {
-    console.log(data)
     // todo: 调用登录接口
     const token = await login(data)
     // 返回一个token 123456
@@ -29,6 +28,10 @@ const actions = {
   async getUserInfo(context) {
     const res = await getUserInfo()
     context.commit('setUserInfo', res)
+  },
+  async logout(context) {
+    context.commit('removeToken')
+    context.commit('setUserInfo', {})
   }
 }
 export default {

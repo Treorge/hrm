@@ -25,9 +25,14 @@ service.interceptors.response.use((response) => {
     return Promise.reject(new Error(message))
   }
 }, async(error) => {
+  if (error.response.starus === 401) {
+    Message({ type: 'error', message: 'token失效，请重新登录' })
+    await store.dispatch('user/logout')
+    this.$router.push('/login')
+    return Promise.reject(error)
+  }
   Message({ type: 'error', message: error.message })
   return Promise.reject(error)
-}
-)
+})
 
 export default service
