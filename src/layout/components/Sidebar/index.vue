@@ -12,6 +12,7 @@
         :collapse-transition="false"
         mode="vertical"
       >
+        <!-- 遍历路由生成sidebar-item -->
         <sidebar-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
       </el-menu>
     </el-scrollbar>
@@ -31,6 +32,7 @@ export default {
       'sidebar'
     ]),
     routes() {
+      // 获取当前路由的所有路由信息
       return this.$router.options.routes
     },
     activeMenu() {
