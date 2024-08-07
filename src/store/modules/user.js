@@ -1,7 +1,8 @@
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import { login } from '@/api/user'
+import { getUserInfo, login } from '@/api/user'
 const state = {
-  token: getToken()
+  token: getToken(),
+  userInfo: {}
 }
 const mutations = {
   setToken(state, token) {
@@ -11,6 +12,9 @@ const mutations = {
   removeToken(state) {
     state.token = null
     removeToken()
+  },
+  setUserInfo(state, userInfo) {
+    state.userInfo = userInfo
   }
 }
 const actions = {
@@ -21,6 +25,10 @@ const actions = {
     const token = await login(data)
     // 返回一个token 123456
     context.commit('setToken', token)
+  },
+  async getUserInfo(context) {
+    const res = await getUserInfo()
+    context.commit('setUserInfo', res)
   }
 }
 export default {
