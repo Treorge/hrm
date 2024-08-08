@@ -1,13 +1,13 @@
 <template>
   <div class="container">
     <div class="app-container">
-      <el-tree :data="departs" :props="defaultProps" default-expand-all="true">
+      <el-tree :data="departs" :props="defaultProps" default-expand-all :expand-on-click-node="false">
         <template v-slot="{data}">
           <el-row style="width: 100%;height: 40px;" type="flex" justify="space-between" align="middle">
             <el-col>{{ data.name }}</el-col>
             <el-col :span="4">
               <span class="tree-manager">{{ data.managerName }}</span>
-              <el-dropdown>
+              <el-dropdown @command="handleCommand($event, data.id)">
                 <!-- 显示区域内容 -->
                 <span class="el-dropdown-link">
                   操作<i class="el-icon-arrow-down el-icon--right" />
@@ -24,6 +24,7 @@
         </template>
       </el-tree>
     </div>
+    <add-dept :current-node-id="currentNodeId" :show-dialog.sync="showDialog" @updateDepartment="getDepartment" />
   </div>
 </template>
 <script>
@@ -32,13 +33,18 @@ import { listToTree } from '@/utils'
 
 export default {
   name: 'Department',
+  components: {
+    AddDept: () => import('./components/add-dep')
+  },
   data() {
     return {
       departs: [],
       defaultProps: {
         children: 'children',
         label: 'name'
-      }
+      },
+      showDialog: false,
+      currentNodeId: null
     }
   },
   created() {
@@ -48,6 +54,12 @@ export default {
     async getDepartment() {
       const res = await getDepartmentList()
       this.departs = listToTree(res, 0)
+    },
+    handleCommand(type, id) {
+      if (type === 'add') {
+        this.showDialog = true
+        this.currentNodeId = id
+      }
     }
   }
 }
@@ -61,6 +73,6 @@ export default {
 .tree-manager {
   width: 50px;
   display: inline-block;
-  margin: 40px;
+  margin-right: 40px;
 }
 </style>
