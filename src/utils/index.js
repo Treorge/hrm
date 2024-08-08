@@ -115,3 +115,20 @@ export function param2Obj(url) {
   })
   return obj
 }
+
+/**
+ * 列表数据转树形
+ */
+export function listToTree(list, rootValue) {
+  const arr = []
+  list.forEach(item => {
+    if (item.pid === rootValue) {
+      const children = listToTree(list, item.id)
+      if (children.length > 0) {
+        item.children = children
+      }
+      arr.push(item)
+    }
+  })
+  return arr
+}

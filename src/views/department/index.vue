@@ -27,31 +27,27 @@
   </div>
 </template>
 <script>
+import { getDepartmentList } from '@/api/department'
+import { listToTree } from '@/utils'
+
 export default {
   name: 'Department',
   data() {
     return {
-      departs: [{
-        name: '传智教育',
-        managerName: '管理员',
-        children: [
-          { name: '总裁办', managerName: '管理员' },
-          { name: '行政部', managerName: '管理员' },
-          {
-            name: '人事部',
-            managerName: '管理员',
-            children: [
-              { name: '财务核算部', managerName: '管理员' },
-              { name: '税务管理部', managerName: '管理员' },
-              { name: '薪资管理部', managerName: '管理员' }
-            ]
-          }
-        ]
-      }],
+      departs: [],
       defaultProps: {
         children: 'children',
         label: 'name'
       }
+    }
+  },
+  created() {
+    this.getDepartment()
+  },
+  methods: {
+    async getDepartment() {
+      const res = await getDepartmentList()
+      this.departs = listToTree(res, 0)
     }
   }
 }
@@ -59,12 +55,12 @@ export default {
 
 <style scoped>
 .app-container {
-  padding: 30px ;
+  padding: 30px;
   font-size: 14px;
 }
 .tree-manager {
   width: 50px;
   display: inline-block;
-  margin: 10px;
+  margin: 40px;
 }
 </style>
