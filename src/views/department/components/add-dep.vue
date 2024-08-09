@@ -55,7 +55,7 @@ export default {
       },
       rules: {
         code: [
-          { require: true, message: '部门编码不能为空', trigger: 'blur' },
+          { required: true, message: '部门编码不能为空', trigger: 'blur' },
           { min: 2, max: 10, message: '部门编码的长度为2-10个字符', trigger: 'blur' },
           {
             trigger: 'blur',
@@ -71,12 +71,12 @@ export default {
           }
         ],
         introduce: [
-          { require: true, message: '部门介绍不能为空', trigger: 'blur' },
+          { required: true, message: '部门介绍不能为空', trigger: 'blur' },
           { min: 1, max: 100, message: '部门介绍的长度为1-100个字符', trigger: 'blur' }
         ],
-        managerId: [{ require: true, message: '部门负责人不能为空', trigger: 'blur' }],
+        managerId: [{ required: true, message: '部门负责人不能为空', trigger: 'blur' }],
         name: [
-          { require: true, message: '部门名称不能为空', trigger: 'blur' },
+          { required: true, message: '部门名称不能为空', trigger: 'blur' },
           { min: 2, max: 10, message: '部门名称的长度为2-10个字符', trigger: 'blur' },
           {
             trigger: 'blur',
