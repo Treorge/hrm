@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="新增部门" :visible="showDialog" @close="close">
+  <el-dialog :title="getTitle" :visible="showDialog" @close="close">
     <el-form ref="form" :model="form" :rules="rules">
       <el-form-item label="部门名称" :label-width="formLabelWidth" prop="name">
         <el-input v-model="form.name" autocomplete="off" style="width: 80%" placeholder="2-10个字符" />
@@ -19,8 +19,8 @@
     <div slot="footer" class="dialog-footer">
       <el-row type="flex" justify="center">
         <el-col :span="12">
-          <el-button type="primary" @click="handleAdd">确认</el-button>
-          <el-button class="cancelButton" @click="handleCancel">取 消</el-button>
+          <el-button type="primary" @click="handleOk">确认</el-button>
+          <el-button class="cancelButton" @click="close">取 消</el-button>
         </el-col>
       </el-row>
     </div>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { addDepartment, getDepartmentList, getManagerList } from '@/api/department'
+import { addDepartment, getDepartmentDetail, getDepartmentList, getManagerList, updateDepartment } from '@/api/department'
 
 export default {
   name: 'AddDept',
@@ -44,6 +44,7 @@ export default {
   },
   data() {
     return {
+      managerList: [],
       formLabelWidth: '120px',
       form: {
         name: '',
@@ -59,7 +60,10 @@ export default {
           {
             trigger: 'blur',
             validator: async(rule, value, callback) => {
-              const res = await getDepartmentList()
+              let res = await getDepartmentList()
+              if (this.form.id) {
+                res = res.filter(item => item.id !== this.form.id)
+              }
               if (res.some(item => item.code === value)) {
                 callback(new Error('部门编码已存在'))
               } else { callback() }
@@ -76,8 +80,12 @@ export default {
           { min: 2, max: 10, message: '部门名称的长度为2-10个字符', trigger: 'blur' },
           {
             trigger: 'blur',
-            validator: async(ruel, value, callback) => {
-              const res = await getDepartmentList()
+            validator: async(rule, value, callback) => {
+              let res = await getDepartmentList()
+              // 排除当前编辑的部门
+              if (this.form.id) {
+                res = res.filter(item => item.id !== this.form.id)
+              }
               if (res.some(item => item.name === value)) {
                 callback(new Error('部门名称已存在'))
               } else {
@@ -86,8 +94,12 @@ export default {
             }
           }
         ]
-      },
-      managerList: []
+      }
+    }
+  },
+  computed: {
+    getTitle() {
+      return this.form.id ? '编辑部门' : '新增部门'
     }
   },
   created() {
@@ -95,30 +107,38 @@ export default {
   },
   methods: {
     close() {
+      this.form = {
+        code: '', // 部门编码
+        introduce: '', // 部门介绍
+        managerId: '', // 部门负责人id
+        name: '', // 部门名称
+        pid: '' // 父级部门的id
+      }
+      this.$refs.form.resetFields() // 重置表单
       this.$emit('update:showDialog', false)
-      this.$refs.form.resetFields()
     },
-    handleAdd() {
+    handleOk() {
       this.$refs.form.validate(async(valid) => {
         if (valid) {
-          // 调用接口
-          await addDepartment({ ...this.form, pid: this.currentNodeId })
+          let msg = '修改成功'
+          if (this.form.id) {
+            await updateDepartment(this.form)
+          } else {
+            msg = '新增成功'
+            await addDepartment({ ...this.form, pid: this.currentNodeId })
+          }
           this.$emit('updateDepartment')
-          this.$message.success('修改成功')
-          this.$refs.form.resetFields()
-          //   this.handleCancel()
+          this.$message.success(`${msg}`)
           this.close()
         }
       })
     },
-    handleCancel() {
-      this.$refs.form.resetFields()
-      this.$emit('update:showDialog', false)
-    },
     async getManagerList() {
-      const res = await getManagerList()
-      this.managerList = res
-      res.forEach(item => { item.id = JSON.stringify(item.id) })
+      this.managerList = await getManagerList()
+      // this.managerList.forEach(item => { item.id = JSON.stringify(item.id) })
+    },
+    async getDepartmentDetail() {
+      this.form = await getDepartmentDetail(this.currentNodeId)
     }
   }
 }

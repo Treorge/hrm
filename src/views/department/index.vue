@@ -24,11 +24,11 @@
         </template>
       </el-tree>
     </div>
-    <add-dept :current-node-id="currentNodeId" :show-dialog.sync="showDialog" @updateDepartment="getDepartment" />
+    <add-dept ref="addDept" :current-node-id="currentNodeId" :show-dialog.sync="showDialog" @updateDepartment="getDepartment" />
   </div>
 </template>
 <script>
-import { getDepartmentList } from '@/api/department'
+import { getDepartmentList, deleteDepartment } from '@/api/department'
 import { listToTree } from '@/utils'
 
 export default {
@@ -59,6 +59,30 @@ export default {
       if (type === 'add') {
         this.showDialog = true
         this.currentNodeId = id
+      } else if (type === 'edit') {
+        this.showDialog = true
+        this.currentNodeId = id
+        this.$nextTick(() => {
+          this.$refs.addDept.getDepartmentDetail()
+        })
+      } else {
+        this.$confirm('确定删除吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async() => {
+          await deleteDepartment(id)
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          this.getDepartment()
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
       }
     }
   }
