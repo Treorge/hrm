@@ -135,7 +135,6 @@ export default {
     },
     async getManagerList() {
       this.managerList = await getManagerList()
-      // this.managerList.forEach(item => { item.id = JSON.stringify(item.id) })
     },
     async getDepartmentDetail() {
       this.form = await getDepartmentDetail(this.currentNodeId)

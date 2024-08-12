@@ -5,14 +5,37 @@
         <el-button type="primary" size="mini" @click="addRole">添加角色</el-button>
       </div>
       <el-table :data="roleList">
-        <el-table-column prop="name" align="center" width="200" label="角色" />
-        <el-table-column prop="state" align="center" width="200" label="启用" />
-        <el-table-column prop="description" align="center" label="描述" />
+        <el-table-column prop="name" align="center" width="200" label="角色">
+          <template v-slot="{row}">
+            <el-input v-if="row.isEdit" v-model="row.editRow.name" size="mini" />
+            <span v-else>{{ row.name }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="state" align="center" width="200" label="启用">
+          <template v-slot="{row}">
+            <el-switch v-if="row.isEdit" v-model="row.editRow.state" />
+            <span v-else>{{ row.state === 1 ? "启用" : row.state === 0 ? "未启用" : "无" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="description" align="center" label="描述">
+          <template v-slot="{row}">
+            <el-input v-if="row.isEdit" v-model="row.editRow.description" type="textarea" />
+            <span v-else>{{ row.description }}</span>
+          </template>
+        </el-table-column>
         <el-table-column align="center" label="操作" fixed="right">
-          <template slot-scope="scope">
-            <el-button type="text" size="small">分配权限</el-button>
-            <el-button type="text" size="small" @click="handleCheck(scope.row)">查看</el-button>
-            <el-button type="text" size="small">删除</el-button>
+          <template v-slot="{row}">
+            <template v-if="row.isEdit">
+              <el-button type="primary" size="mini" @click="handleUpdate(row)">确定</el-button>
+              <el-button size="mini" @click="row.isEdit = false">取消</el-button>
+            </template>
+            <template v-else>
+              <el-button type="text" size="small">分配权限</el-button>
+              <el-button type="text" size="small" @click="handleEdit(row)">编辑</el-button>
+              <el-popconfirm title="这是一段内容确定删除吗？" @onConfirm="confirmDel(row.id)">
+                <el-button slot="reference" style="margin-left:10px" size="mini" type="text">删除</el-button>
+              </el-popconfirm>
+            </template>
           </template>
         </el-table-column>
       </el-table>
@@ -44,7 +67,7 @@
   </div>
 </template>
 <script>
-import { addRole, getRoleList } from '@/api/role'
+import { addRole, delRole, getRoleList, updateRole } from '@/api/role'
 
 export default {
   name: 'Role',
@@ -52,7 +75,7 @@ export default {
     return {
       roleList: [],
       pageParams: {
-        pagesize: 10,
+        pagesize: 15,
         currentpage: 1,
         total: 0
       },
@@ -77,13 +100,24 @@ export default {
       const { rows, total } = await getRoleList(this.pageParams)
       this.roleList = rows
       this.pageParams = total
+      this.roleList.forEach(item => {
+        this.$set(item, 'isEdit', false)
+        this.$set(item, 'editRow', {
+          name: item.name,
+          state: +item.state,
+          description: item.description
+        })
+      })
     },
     pageChange(newPage) {
       this.pageParams.currentpage = newPage
       this.getRoleList()
     },
-    handleCheck() {
-
+    handleEdit(row) {
+      row.isEdit = true
+      row.editRow.name = row.name
+      row.editRow.state = +row.state
+      row.editRow.description = row.description
     },
     addRole() {
       this.showDialog = true
@@ -106,6 +140,26 @@ export default {
         description: ''
       }
       this.$refs.roleForm.resetFields()
+    },
+    async handleUpdate(row) {
+      if (row.editRow.name && row.editRow.description) {
+        await updateRole({ id: row.id, name: row.editRow.name, description: row.editRow.description, state: +row.editRow.state })
+        this.$message.success('修改成功')
+        Object.assign(row, {
+          ...row.editRow,
+          isEdit: false
+        })
+      } else {
+        this.$message.warning('角色和描述不能为空')
+      }
+    },
+    async confirmDel(id) {
+      await delRole(id)
+      this.$message.success('删除成功')
+      if (this.roleList.length === 1 && this.pageParams.currentpage > 1) {
+        this.pageParams.currentpage--
+      }
+      this.getRoleList()
     }
   }
 }
