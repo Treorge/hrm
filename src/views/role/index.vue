@@ -40,7 +40,13 @@
         </el-table-column>
       </el-table>
       <el-row type="flex" style="height:60px" align="middle" justify="end">
-        <el-pagination :page-size="pageParams.pagesize" :current-page="pageParams.currentpage" :total="pageParams.total" layout="prev, pager, next" @current-change="pageChange" />
+        <el-pagination
+          :page-size="pageParams.pagesize"
+          :current-page="pageParams.page"
+          :total="pageParams.total"
+          layout="prev, pager, next"
+          @current-change="pageChange"
+        />
       </el-row>
     </div>
     <el-dialog title="新增角色" :visible.sync="showDialog" @close="close">
@@ -75,8 +81,8 @@ export default {
     return {
       roleList: [],
       pageParams: {
-        pagesize: 15,
-        currentpage: 1,
+        pagesize: 5,
+        page: 1,
         total: 0
       },
       showDialog: false,
@@ -99,7 +105,7 @@ export default {
       // this.roleList = await getRoleList()
       const { rows, total } = await getRoleList(this.pageParams)
       this.roleList = rows
-      this.pageParams = total
+      this.pageParams.total = total
       this.roleList.forEach(item => {
         this.$set(item, 'isEdit', false)
         this.$set(item, 'editRow', {
@@ -110,7 +116,7 @@ export default {
       })
     },
     pageChange(newPage) {
-      this.pageParams.currentpage = newPage
+      this.pageParams.page = newPage
       this.getRoleList()
     },
     handleEdit(row) {
@@ -156,8 +162,8 @@ export default {
     async confirmDel(id) {
       await delRole(id)
       this.$message.success('删除成功')
-      if (this.roleList.length === 1 && this.pageParams.currentpage > 1) {
-        this.pageParams.currentpage--
+      if (this.roleList.length === 1 && this.pageParams.page > 1) {
+        this.pageParams.page--
       }
       this.getRoleList()
     }
