@@ -17,6 +17,8 @@ service.interceptors.request.use((config) => {
 })
 
 service.interceptors.response.use((response) => {
+  // 是blob类型直接返回
+  if (response.data instanceof Blob) return response.data
   const { data, message, success } = response.data
   if (success) {
     return data
