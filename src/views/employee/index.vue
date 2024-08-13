@@ -50,10 +50,12 @@
           <el-table-column prop="departmentName" label="部门" />
           <el-table-column prop="timeOfEntry" label="入职时间" sortable />
           <el-table-column label="操作" width="280px">
-            <template>
+            <template v-slot="{row}">
               <el-button size="mini" type="text">查看</el-button>
               <el-button size="mini" type="text">角色</el-button>
-              <el-button size="mini" type="text">删除</el-button>
+              <el-popconfirm title="确认删除该数据吗？" @onConfirm="confirmDel(row.id)">
+                <el-button slot="reference" style="margin-left:10px" size="mini" type="text">删除</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -75,7 +77,7 @@
 
 <script>
 import { getDepartmentList } from '@/api/department'
-import { exportEmployee, getEmployeeList } from '@/api/employee'
+import { delEmployee, exportEmployee, getEmployeeList } from '@/api/employee'
 import { listToTree } from '@/utils'
 import FileSaver from 'file-saver'
 import importExcel from './components/import-excel.vue'
@@ -141,6 +143,12 @@ export default {
     async exportEmployee() {
       const res = await exportEmployee() // 接口请求时间过长，想要结果调整timeout
       FileSaver.saveAs(res, '员工信息.xls')
+    },
+    async confirmDel(id) {
+      await delEmployee(id)
+      if (this.list.length === 1 && this.queryParams.page > 1) this.queryParams.page--
+      this.getEmployeeList()
+      this.$message.success('删除成功')
     }
   }
 }
