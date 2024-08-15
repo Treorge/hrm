@@ -1,8 +1,10 @@
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { getUserInfo, login } from '@/api/user'
+import { constantRoutes } from '@/router'
 const state = {
   token: getToken(),
-  userInfo: {}
+  userInfo: {},
+  routes: constantRoutes
 }
 const mutations = {
   setToken(state, token) {
@@ -15,6 +17,9 @@ const mutations = {
   },
   setUserInfo(state, userInfo) {
     state.userInfo = userInfo
+  },
+  setRoutes(state, asyncRoutes) {
+    state.routes = [...constantRoutes, ...asyncRoutes]
   }
 }
 const actions = {
@@ -28,6 +33,7 @@ const actions = {
   async getUserInfo(context) {
     const res = await getUserInfo()
     context.commit('setUserInfo', res)
+    return res
   },
   async logout(context) {
     context.commit('removeToken')

@@ -1,6 +1,7 @@
 import layout from '@/layout'
 export default {
   path: '/employee',
+  name: 'employee',
   component: layout,
   children: [{
     path: '',
@@ -11,12 +12,11 @@ export default {
       icon: 'people'
     }
   }, {
-    path: '/employee/detail',
+    path: '/employee/detail/:id?',
     component: () => import('@/views/employee/detail.vue'),
     hidden: true, // 隐藏在左侧菜单栏
     meta: {
-      title: '员工详情',
-      icon: 'people'
+      title: '员工详情' // 显示在导航的文本
     }
   }]
 }

@@ -1,4 +1,4 @@
-import router from '@/router'
+import router, { asyncRoutes } from '@/router'
 import nProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import store from '@/store'
@@ -13,7 +13,13 @@ router.beforeEach(async(to, from, next) => {
       nProgress.done()
     } else {
       if (!store.getters.userId) {
-        await store.dispatch('user/getUserInfo')
+        const { roles } = await store.dispatch('user/getUserInfo')
+        const filterRoutes = asyncRoutes.filter(item => {
+          return roles.menus.includes(item.name)
+        })
+        store.commit('user/setRoutes', filterRoutes)
+        router.addRoutes([...filterRoutes, { path: '*', redirect: '/404', hidden: true }])
+        next(to.path)
       }
       next()
     }

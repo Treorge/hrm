@@ -26,6 +26,7 @@
               <el-form-item label="手机" prop="mobile">
                 <el-input
                   v-model="userInfo.mobile"
+                  :disabled="!!$route.params.id"
                   size="mini"
                   class="inputW"
                 />
@@ -79,13 +80,14 @@
             <el-col :span="12">
               <el-form-item label="员工头像">
                 <!-- 放置上传图片 -->
+                <image-upload v-model="userInfo.staffPhoto" />
               </el-form-item>
             </el-col>
           </el-row>
           <!-- 保存个人信息 -->
           <el-row type="flex">
             <el-col :span="12" style="margin-left:220px">
-              <el-button size="mini" type="primary" @click="saveData">添加</el-button>
+              <el-button size="mini" type="primary" @click="saveData">保存更新</el-button>
             </el-col>
           </el-row>
         </el-form>
@@ -96,11 +98,13 @@
 </template>
 
 <script>
-import { addEmployee } from '@/api/employee'
+import { addEmployee, getEmployeeDetail, updateEmployee } from '@/api/employee'
+import ImageUpload from './components/image-upload.vue'
 
 export default {
   components: {
-    selectTree: () => import('./components/select-tree.vue')
+    selectTree: () => import('./components/select-tree.vue'),
+    ImageUpload
   },
   data() {
     return {
@@ -111,7 +115,8 @@ export default {
         formOfEmployment: null,
         departmentId: null,
         timeOfEntry: '',
-        correctionTime: ''
+        correctionTime: '',
+        staffPhoto: ''
       },
       rules: {
         username: [
@@ -142,15 +147,26 @@ export default {
       }
     }
   },
+  created() {
+    this.$route.params.id && this.getEmployeeDetail()
+  },
   methods: {
     saveData() {
       this.$refs.userForm.validate(async valid => {
         if (valid) {
-          await addEmployee(this.userInfo)
-          this.$message.success('新增员工成功')
+          if (this.$route.params.id) {
+            await updateEmployee(this.userInfo)
+            this.$message.success('更新员工信息成功')
+          } else {
+            await addEmployee(this.userInfo)
+            this.$message.success('新增员工成功')
+          }
           this.$router.push('/employee')
         }
       })
+    },
+    async getEmployeeDetail() {
+      this.userInfo = await getEmployeeDetail(this.$route.params.id)
     }
   }
 }
