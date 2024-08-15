@@ -33,6 +33,19 @@ Vue.use(ElementUI)
 // 如果想要中文版 element-ui，按如下方式声明
 // Vue.use(ElementUI)
 
+// 封装自定义指令控制操作权
+Vue.directive('permission', {
+  // el是指令作用的dom元素
+  inserted(el, binding) {
+    // 指令作用的元素插入页面后触发
+    const points = store.state.user.userInfo?.roles?.points || []
+    // 不存在则删除
+    if (!points.includes(binding.value)) {
+      el.remove()
+    }
+  }
+})
+
 Vue.config.productionTip = false
 
 new Vue({
