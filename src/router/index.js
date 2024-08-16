@@ -78,7 +78,7 @@ export const asyncRoutes = [
 ]
 
 const createRouter = () => new Router({
-  // mode: 'history', // require service support
+  mode: 'history', // 历史模式：#后面的地址变化会引起页面的刷新（webpack配置-开发环境不刷新）
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes
 })
