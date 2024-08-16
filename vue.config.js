@@ -51,6 +51,12 @@ module.exports = {
       alias: {
         '@': resolve('src')
       }
+    },
+    //  打包时排除项
+    externals: {
+      'vue': 'Vue',
+      'element-ui': 'ELEMENT'
+      // 'cos-js-sdk-v5': 'COS'
     }
   },
   chainWebpack(config) {

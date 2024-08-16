@@ -14,7 +14,7 @@
 </template>
 
 <script>
-// import COS from 'cos-js-sdk-v5'
+import COS from 'cos-js-sdk-v5'
 export default {
   props: {
     value: {
@@ -37,6 +37,27 @@ export default {
         this.$message.error('上传头像图片大小不能超过 5MB!')
       }
       return isJPG && isLt2M
+    },
+    uploadImage(params) {
+      const cos = new COS({
+        SecretId: '',
+        SecretKey: ''
+      })
+      cos.putObject({
+        Bucket: '', // 存储桶名称
+        Region: '', // 地域名称
+        Key: params.file.name, // 文件名称
+        StorageClass: 'STANDARD', // 固定值
+        Body: params.file // 文件对象
+      }, (err, data) => {
+        if (data.statusCode === 200 && data.Location) {
+          // 拿到了腾讯云返回的地址
+          // 通过input自定义事件将地址传出去
+          this.$emit('input', 'http://' + data.Location) // 将地址返回
+        } else {
+          this.$message.error(err.Message) // 上传失败提示消息
+        }
+      })
     }
   }
 }
